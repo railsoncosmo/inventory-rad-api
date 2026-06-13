@@ -8,6 +8,11 @@ class DatabaseIntegration:
     self.db = self.DATABASE
     self.init_database()
 
+  def _connect(self):
+    conn = sqlite3.connect(self.db)
+    conn.row_factory = sqlite3.Row
+    return conn
+
   def init_database(self):
     conn = None
     try:
@@ -43,7 +48,7 @@ class DatabaseIntegration:
         INSERT INTO {self.table} ({", ".join(columns)}) 
         VALUES ({", ".join(['?'] * keys)})
       """
-      conn = sqlite3.connect(self.db)
+      conn = self._connect()
       cursor = conn.cursor()
       cursor.execute(query, values)
       conn.commit()
@@ -54,12 +59,12 @@ class DatabaseIntegration:
       if conn:
         conn.close()
     return document
-  
+
   def find(self, where=None):
     conn = None
     documents = []
     try:
-      conn = sqlite3.connect(self.db)
+      conn = self._connect()
       cursor = conn.cursor()
     
       if where is None or not where:
@@ -85,7 +90,7 @@ class DatabaseIntegration:
       query = f"""
         SELECT * FROM {self.table} WHERE id = ?
       """
-      conn = sqlite3.connect(self.db)
+      conn = self._connect()
       cursor = conn.cursor()
       cursor.execute(query, (id,))
       document = cursor.fetchone()
@@ -97,10 +102,9 @@ class DatabaseIntegration:
       if conn:
         conn.close()
 
-  
   def update(self, id, document):
     try:
-      conn = sqlite3.connect(self.db)
+      conn = self._connect()
       cursor = conn.cursor()
       columns = ", ".join([f"{key} = ?" for key in document.keys()])
       sql = f"UPDATE {self.table} SET {columns} WHERE id = ?"
@@ -121,7 +125,7 @@ class DatabaseIntegration:
       document = self.findOne(id)
       query = f"DELETE FROM {self.table} WHERE id = ?"
       if document:
-        conn = sqlite3.connect(self.db)
+        conn = self._connect()
         cursor = conn.cursor()
         cursor.execute(query, (id,))
         conn.commit()
