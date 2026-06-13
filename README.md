@@ -39,10 +39,10 @@ O sistema permite o **CRUD completo de produtos** (criar, listar, filtrar, edita
 flowchart TB
     subgraph Cliente["Cliente Desktop"]
         Root["Root — janela principal"]
-        Create["CreateProductView — cadastro/edição"]
+        FormView["CreateProductView — cadastro/edição"]
         List["ListProductsView — listagem e filtro"]
         Row["ProductRow — linha da tabela"]
-        Root --> Create
+        Root --> FormView
         Root --> List
         List --> Row
     end
@@ -269,16 +269,16 @@ sequenceDiagram
 sequenceDiagram
     participant U as Usuário
     participant List as ListProductsView
-    participant Create as CreateProductView
+    participant Form as CreateProductView
     participant API as Flask API
 
-    U->>List: Clica "Editar" na linha
-    List->>Create: show_view("create", product)
-    Create->>Create: load_for_edit() — preenche campos
-    U->>Create: Altera dados e clica Salvar
-    Create->>API: PUT /products/{id}
-    API-->>Create: 200
-    Create->>List: Volta para listagem (refresh)
+    U->>List: Clica Editar na linha
+    List->>Form: Abre tela de edição com produto
+    Form->>Form: load_for_edit preenche campos
+    U->>Form: Altera dados e clica Salvar
+    Form->>API: PUT /products/id
+    API-->>Form: 200
+    Form->>List: Volta para listagem refresh
 ```
 
 ### Remover produto
