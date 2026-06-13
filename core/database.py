@@ -71,9 +71,16 @@ class DatabaseIntegration:
         query = f"SELECT * FROM {self.table};"
         cursor.execute(query)
       else:
-        columns = " AND ".join([f"{key} = ?" for key in where.keys()])
-        query = f"SELECT * FROM {self.table} WHERE {columns}"
-        values = list(where.values())
+        conditions = []
+        values = []
+        for key, val in where.items():
+          if isinstance(val, str):
+            conditions.append(f"{key} LIKE ?")
+            values.append(f"%{val}%")
+          else:
+            conditions.append(f"{key} = ?")
+            values.append(val)
+        query = f"SELECT * FROM {self.table} WHERE {' AND '.join(conditions)}"
         cursor.execute(query, values)
       
       documents = cursor.fetchall()

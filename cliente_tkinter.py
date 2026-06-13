@@ -49,7 +49,7 @@ class CreateProductView(tk.Frame):
     self.root_app = root_app
     self.editing_id = None
 
-    self.title_label = tk.Label(self, text="Criar Produto", font=("Helvetica", 18, "bold"), bg="white")
+    self.title_label = tk.Label(self, text="Cadastro", font=("Helvetica", 18, "bold"), bg="black")
     self.title_label.pack(pady=(20, 30))
 
     center = tk.Frame(self, bg="white")
@@ -81,7 +81,7 @@ class CreateProductView(tk.Frame):
     buttons.pack(pady=(10, 40), anchor="center")
 
     form_button(buttons, "Salvar", self.save_product).pack(side="left", padx=10)
-    form_button(buttons, "Cancelar", self.reset).pack(side="left", padx=10)
+    form_button(buttons, "Cancelar", self.cancel).pack(side="left", padx=10)
 
   def clear_form(self):
     for entry in self.fields.values():
@@ -89,8 +89,12 @@ class CreateProductView(tk.Frame):
 
   def reset(self):
     self.editing_id = None
-    self.title_label.config(text="Criar Produto")
+    self.title_label.config(text="Cadastro", bg="black")
     self.clear_form()
+
+  def cancel(self):
+    self.reset()
+    self.root_app.show_view("list")
 
   def load_for_edit(self, product):
     self.editing_id = product.get("id")
@@ -234,9 +238,23 @@ class ListProductsView(tk.Frame):
     page_header.pack(fill="x", padx=20, pady=(20, 16))
 
     tk.Label(
-      page_header, text="Listar Produtos", font=("Helvetica", 18, "bold"),
+      page_header, text="Listagem de Produtos", font=("Helvetica", 18, "bold"),
       bg="white", fg="#111827",
     ).pack(side="left")
+
+    filter_bar = tk.Frame(self, bg="white")
+    filter_bar.pack(fill="x", padx=20, pady=(0, 12))
+
+    tk.Label(
+      filter_bar, text="Filtro", font=("Helvetica", 11, "bold"),
+      bg="white", fg="#374151",
+    ).pack(side="left", padx=(0, 8))
+
+    self.filter_entry = tk.Entry(filter_bar, font=("Helvetica", 11), width=30)
+    self.filter_entry.pack(side="left", padx=(0, 8))
+    self.filter_entry.bind("<Return>", lambda _e: self.refresh())
+
+    form_button(filter_bar, "Buscar", self.refresh).pack(side="left")
 
     table_container = tk.Frame(self, bg="white", highlightbackground="#e5e7eb", highlightthickness=1)
     table_container.pack(fill="both", expand=True, padx=20, pady=(0, 20))
@@ -300,23 +318,36 @@ class ListProductsView(tk.Frame):
         fg=self.HEADER_FG, bg=self.HEADER_BG, anchor="w",
       ).grid(row=0, column=index, sticky="w")
 
+  def _show_message(self, text, show_retry=False):
+    for widget in self.rows_frame.winfo_children():
+      widget.destroy()
+
+    frame = tk.Frame(self.rows_frame, bg="white")
+    frame.pack(pady=40)
+
+    tk.Label(
+      frame, text=text, font=("Helvetica", 12), fg="#6b7280", bg="white",
+      justify="center",
+    ).pack()
+
+    if show_retry:
+      form_button(frame, "Tentar novamente", self.refresh).pack(pady=(12, 0))
+
   def refresh(self):
     for widget in self.rows_frame.winfo_children():
       widget.destroy()
 
     try:
-      response = requests.get(f"{API_URL}/products", timeout=5)
+      name_filter = self.filter_entry.get().strip()
+      params = {"name": name_filter} if name_filter else {}
+      response = requests.get(f"{API_URL}/products", params=params, timeout=5)
       if response.status_code != 200:
         messagebox.showerror("Erro", f"Não foi possível listar os produtos. ({response.status_code})")
         return
 
       products = response.json()
       if not products:
-        empty = tk.Label(
-          self.rows_frame, text="Nenhum produto cadastrado.",
-          font=("Helvetica", 12), fg="#6b7280", bg="white", pady=40,
-        )
-        empty.pack()
+        self._show_message("Nenhum produto cadastrado.")
         return
 
       for product in products:
@@ -325,7 +356,11 @@ class ListProductsView(tk.Frame):
       self.rows_frame.update_idletasks()
       self.canvas.configure(scrollregion=self.canvas.bbox("all"))
     except requests.RequestException:
-      messagebox.showerror("Erro", "Não foi possível conectar ao servidor. Verifique se o Flask está rodando.")
+      self._show_message(
+        "Não foi possível conectar ao servidor.\n"
+        "Inicie a API em outro terminal com:\npython app.py",
+        show_retry=True,
+      )
 
   def edit_product(self, product):
     self.root_app.show_view("create", product=product)
@@ -362,7 +397,7 @@ class Root:
       bg="black", fg="white",
     ).pack(pady=(20, 30))
 
-    nav_style = {"font": ("Helvetica", 11), "bg": "#333", "fg": "white", "width": 16, "cursor": "hand2", "pady": 8}
+    nav_style = {"font": ("Helvetica", 11), "bg": "white", "fg": "black", "width": 16, "cursor": "hand2", "pady": 8}
 
     tk.Button(
       self.sidebar, text="Criar Produto",
