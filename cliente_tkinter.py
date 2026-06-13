@@ -3,13 +3,14 @@ from tkinter import ttk, messagebox
 import requests
 
 API_URL = "http://localhost:5001"
+FONT_FAMILY = "Helvetica"
 
 
 def form_button(parent, text, command):
   btn = tk.Label(
     parent,
     text=text,
-    font=("Helvetica", 12, "bold"),
+    font=(FONT_FAMILY, 12, "bold"),
     bg="black",
     fg="white",
     padx=20,
@@ -24,7 +25,7 @@ def action_button(parent, text, command):
   btn = tk.Label(
     parent,
     text=text,
-    font=("Helvetica", 10, "bold"),
+    font=(FONT_FAMILY, 10, "bold"),
     bg="black",
     fg="white",
     padx=8,
@@ -49,7 +50,7 @@ class CreateProductView(tk.Frame):
     self.root_app = root_app
     self.editing_id = None
 
-    self.title_label = tk.Label(self, text="Cadastro", font=("Helvetica", 18, "bold"), bg="black")
+    self.title_label = tk.Label(self, text="Cadastro", font=(FONT_FAMILY, 18, "bold"), bg="black")
     self.title_label.pack(pady=(20, 30))
 
     center = tk.Frame(self, bg="white")
@@ -66,14 +67,14 @@ class CreateProductView(tk.Frame):
       tk.Label(
         field_frame,
         text=attribute,
-        font=("Helvetica", 11, "bold"),
+        font=(FONT_FAMILY, 11, "bold"),
         bg="white",
         fg="#374151",
         anchor="w",
         width=self.FIELD_WIDTH,
       ).pack(anchor="w")
 
-      entry = tk.Entry(field_frame, font=("Helvetica", 12), width=self.FIELD_WIDTH)
+      entry = tk.Entry(field_frame, font=(FONT_FAMILY, 12), width=self.FIELD_WIDTH)
       entry.pack(anchor="w")
       self.fields[key] = entry
 
@@ -157,22 +158,6 @@ def format_price(price):
   return f"R$ {value.replace(',', 'X').replace('.', ',').replace('X', '.')}"
 
 
-def format_sku(product):
-  category = str(product.get("category", "ITEM"))
-  suffix = category.upper().replace(" ", "")[:5]
-  return f"SKU-{product.get('id')}-{suffix}"
-
-
-class StockBadge(tk.Frame):
-  def __init__(self, parent, text, bg_color, text_color):
-    super().__init__(parent, bg="white")
-    badge = tk.Frame(self, bg=bg_color, padx=10, pady=4)
-    badge.pack()
-
-    tk.Label(badge, text="●", font=("Helvetica", 8), fg=text_color, bg=bg_color).pack(side="left")
-    tk.Label(badge, text=text, font=("Helvetica", 10), fg=text_color, bg=bg_color).pack(side="left", padx=(4, 0))
-
-
 class ProductRow(tk.Frame):
   COLUMN_WIDTHS = (200, 120, 90, 90, 150)
 
@@ -191,24 +176,24 @@ class ProductRow(tk.Frame):
 
     name_text = tk.Frame(row, bg="white")
     name_text.grid(row=0, column=0, sticky="w")
-    tk.Label(name_text, text="›", font=("Helvetica", 12), fg="#9ca3af", bg="white").pack(side="left")
+    tk.Label(name_text, text="›", font=(FONT_FAMILY, 12), fg="#9ca3af", bg="white").pack(side="left")
     tk.Label(
-      name_text, text=product.get("name", ""), font=("Helvetica", 11, "bold"),
+      name_text, text=product.get("name", ""), font=(FONT_FAMILY, 11, "bold"),
       fg="#111827", bg="white",
     ).pack(side="left", padx=(4, 0))
 
     tk.Label(
-      row, text=product.get("category", ""), font=("Helvetica", 11),
+      row, text=product.get("category", ""), font=(FONT_FAMILY, 11),
       fg="#6b7280", bg="white", anchor="w",
     ).grid(row=0, column=1, sticky="w")
 
     tk.Label(
-      row, text=product.get("quantity", ""), font=("Helvetica", 11),
+      row, text=product.get("quantity", ""), font=(FONT_FAMILY, 11),
       fg="#6b7280", bg="white", anchor="w",
     ).grid(row=0, column=2, sticky="w")
 
     tk.Label(
-      row, text=format_price(product.get("price", 0)), font=("Helvetica", 11, "bold"),
+      row, text=format_price(product.get("price", 0)), font=(FONT_FAMILY, 11, "bold"),
       fg="#111827", bg="white", anchor="w",
     ).grid(row=0, column=3, sticky="w")
 
@@ -238,7 +223,7 @@ class ListProductsView(tk.Frame):
     page_header.pack(fill="x", padx=20, pady=(20, 16))
 
     tk.Label(
-      page_header, text="Listagem de Produtos", font=("Helvetica", 18, "bold"),
+      page_header, text="Listagem de Produtos", font=(FONT_FAMILY, 18, "bold"),
       bg="white", fg="#111827",
     ).pack(side="left")
 
@@ -246,11 +231,11 @@ class ListProductsView(tk.Frame):
     filter_bar.pack(fill="x", padx=20, pady=(0, 12))
 
     tk.Label(
-      filter_bar, text="Filtro", font=("Helvetica", 11, "bold"),
+      filter_bar, text="Filtro", font=(FONT_FAMILY, 11, "bold"),
       bg="white", fg="#374151",
     ).pack(side="left", padx=(0, 8))
 
-    self.filter_entry = tk.Entry(filter_bar, font=("Helvetica", 11), width=30)
+    self.filter_entry = tk.Entry(filter_bar, font=(FONT_FAMILY, 11), width=30)
     self.filter_entry.pack(side="left", padx=(0, 8))
     self.filter_entry.bind("<Return>", lambda _e: self.refresh())
 
@@ -314,7 +299,7 @@ class ListProductsView(tk.Frame):
 
     for label, index in self.COLUMNS:
       tk.Label(
-        header, text=label, font=("Helvetica", 9, "bold"),
+        header, text=label, font=(FONT_FAMILY, 9, "bold"),
         fg=self.HEADER_FG, bg=self.HEADER_BG, anchor="w",
       ).grid(row=0, column=index, sticky="w")
 
@@ -326,7 +311,7 @@ class ListProductsView(tk.Frame):
     frame.pack(pady=40)
 
     tk.Label(
-      frame, text=text, font=("Helvetica", 12), fg="#6b7280", bg="white",
+      frame, text=text, font=(FONT_FAMILY, 12), fg="#6b7280", bg="white",
       justify="center",
     ).pack()
 
@@ -393,11 +378,11 @@ class Root:
     self.sidebar.pack_propagate(False)
 
     tk.Label(
-      self.sidebar, text="Menu", font=("Helvetica", 14, "bold"),
+      self.sidebar, text="Menu", font=(FONT_FAMILY, 14, "bold"),
       bg="black", fg="white",
     ).pack(pady=(20, 30))
 
-    nav_style = {"font": ("Helvetica", 11), "bg": "white", "fg": "black", "width": 16, "cursor": "hand2", "pady": 8}
+    nav_style = {"font": (FONT_FAMILY, 11), "bg": "white", "fg": "black", "width": 16, "cursor": "hand2", "pady": 8}
 
     tk.Button(
       self.sidebar, text="Criar Produto",
