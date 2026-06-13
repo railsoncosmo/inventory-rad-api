@@ -240,6 +240,7 @@ class ListProductsView(tk.Frame):
     self.filter_entry.bind("<Return>", lambda _e: self.refresh())
 
     form_button(filter_bar, "Buscar", self.refresh).pack(side="left")
+    form_button(filter_bar, "Limpar filtro", self.clear_filter).pack(side="left", padx=(8, 0))
 
     table_container = tk.Frame(self, bg="white", highlightbackground="#e5e7eb", highlightthickness=1)
     table_container.pack(fill="both", expand=True, padx=20, pady=(0, 20))
@@ -317,6 +318,10 @@ class ListProductsView(tk.Frame):
 
     if show_retry:
       form_button(frame, "Tentar novamente", self.refresh).pack(pady=(12, 0))
+
+  def clear_filter(self):
+    self.filter_entry.delete(0, tk.END)
+    self.refresh()
 
   def refresh(self):
     for widget in self.rows_frame.winfo_children():
